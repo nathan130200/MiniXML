@@ -8,17 +8,20 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>Mini XML</Title>
-		<Authors>nathan130200,</Authors>
+		<Authors>nathan130200</Authors>
 		<Description>Simple library for manipulating and reading XML data for the XMPP protocol around XmlReader.</Description>
 		<PackageProjectUrl>https://github.com/nathan130200/MiniXML</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/nathan130200/MiniXML</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>xml, xmpp, jabber, jabber-im</PackageTags>
-		<AssemblyVersion>1.0</AssemblyVersion>
-		<FileVersion>1.0</FileVersion>
+		<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
+		<FileVersion>$(VersionPrefix)</FileVersion>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<AnalysisLevel>latest</AnalysisLevel>
+		<Copyright>nathan130200</Copyright>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -32,5 +35,16 @@
 	  <IsTrimmable>True</IsTrimmable>
 	  <FileAlignment>1024</FileAlignment>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <None Include="..\LICENSE">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 </Project>
