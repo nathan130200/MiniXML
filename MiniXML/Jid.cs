@@ -13,9 +13,12 @@ public readonly struct Jid : IEquatable<Jid>
     private readonly string? _domain = default!;
     private readonly string? _resource;
 
-    public bool IsInvalid
+    bool IsInvalid
         => string.IsNullOrWhiteSpace(_domain);
 
+    /// <summary>
+    /// Gets an invalid instance of the Jabber ID, which can be used to store it temporarily.
+    /// </summary>
     public static Jid Empty => default;
 
     /// <summary>
@@ -135,6 +138,7 @@ public readonly struct Jid : IEquatable<Jid>
         init => _resource = EnsureComponentByteSizeLimit("resource", value);
     }
 
+    /// <inheritdoc/>
     public override int GetHashCode()
     {
         return HashCode.Combine(
@@ -168,9 +172,11 @@ public readonly struct Jid : IEquatable<Jid>
         return result;
     }
 
+    /// <inheritdoc/>
     public override bool Equals(object? obj)
         => obj is Jid other && Equals(other);
 
+    /// <inheritdoc/>
     public bool Equals(Jid other)
     {
         if (IsInvalid || other.IsInvalid)
@@ -188,6 +194,9 @@ public readonly struct Jid : IEquatable<Jid>
     public bool IsBare
         => string.IsNullOrWhiteSpace(_resource);
 
+    /// <summary>
+    /// Gets an instance of the current Jabber ID, without the resource part.
+    /// </summary>
     public Jid Bare => this with
     {
         Resource = default
@@ -237,6 +246,10 @@ public readonly struct Jid : IEquatable<Jid>
             && string.Equals(lhs.Resource, rhs.Resource, CompareMethod);
     }
 
+
+    /// <inheritdoc/>
     public static bool operator ==(Jid left, Jid right) => left.Equals(right);
+
+    /// <inheritdoc/>
     public static bool operator !=(Jid left, Jid right) => !(left == right);
 }

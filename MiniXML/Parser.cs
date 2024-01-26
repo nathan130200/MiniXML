@@ -6,7 +6,7 @@ using System.Xml.Schema;
 namespace MiniXML;
 
 /// <summary>
-/// Mini XML parser.
+/// XMPP parser class.
 /// </summary>
 public class Parser : IDisposable
 {
@@ -33,18 +33,13 @@ public class Parser : IDisposable
     /// <summary>
     /// Fired when the parser encounters the jabber closing tag. <c><![CDATA[</stream:stream>]]></c>
     /// </summary>
-    public event Action<Element> OnStreamEnd = default!;
+    public event Action<Element?> OnStreamEnd = default!;
 
     /// <summary>
-    /// Constructor
+    /// XMPP parser constructor.
     /// </summary>
-    /// <param name="reader">A text reader instance from which you will read the XML.</param>
-    /// <param name="leaveOpen">
-    /// Determines the behavior of the underlying stream. The stream will be disposed if this value is false.
-    /// <para>
-    /// For TCP connections, for example when reading data in the XMPP connection, it is recommended to keep this value as true.
-    /// </para>
-    /// </param>
+    /// <param name="reader">The <see cref="TextReader"/> instance that will be used to extract the XML data.</param>
+    /// <param name="leaveOpen">Determines the behavior of the <see cref="TextReader"/>. If <see langword="true" />, it will not destroy the inner stream wrapped in the <paramref name="reader"/>.</param>
     public Parser(TextReader reader, bool leaveOpen = false)
     {
         _completition = new TaskCompletionSource();
@@ -99,9 +94,6 @@ public class Parser : IDisposable
     void CheckDisposed()
         => ObjectDisposedException.ThrowIf(_disposed, this);
 
-    // Generic globally UTF-8 encoder/decoder instance.
-    static readonly Encoding s_UTF8 = new UTF8Encoding(false, false);
-
     // Wraps a stream in a text reader.
     static StreamReader GetReader(Stream baseStream, XmlEncoding encoding, bool leaveOpen)
         => new(baseStream, GetSystemEncoding(encoding), leaveOpen: leaveOpen);
@@ -116,9 +108,11 @@ public class Parser : IDisposable
     };
 
     /// <summary>
-    /// Constructor
+    /// XMPP parser constructor.
     /// </summary>
-    /// <param name="baseStream">A stream that will be read from.</param>
+    /// <param name="baseStream"><see cref="Stream"/> that will be wrapped in a <see cref="TextReader"/> to read the XML.</param>
+    /// <param name="encoding">Hint to the XML reader which encoding they can expect.</param>
+    /// <param name="leaveOpen">If set to <see langword="true" />, the <paramref name="baseStream"/> will not be destroyed when Dispose in the parser, thus being able to reuse the supplied stream. </param>
     public Parser(Stream baseStream, XmlEncoding encoding, bool leaveOpen = true) :
         this(GetReader(baseStream, encoding, leaveOpen), true)
     {
@@ -127,6 +121,9 @@ public class Parser : IDisposable
 
     #region Dispatch Events
 
+    /// <summary>
+    /// Fires the event to notify that the parser has encountered a critical problem.
+    /// </summary>
     protected virtual void FireOnError(Exception error)
     {
         Exception exception = error;
@@ -146,6 +143,9 @@ public class Parser : IDisposable
         }
     }
 
+    /// <summary>
+    /// Fires the event to notify that the parser received the XMPP end tag.
+    /// </summary>
     protected virtual void FireOnStreamEnd(Element? tag)
     {
         if (_disposed)
@@ -165,6 +165,9 @@ public class Parser : IDisposable
         }
     }
 
+    /// <summary>
+    /// Fires the event to notify that the parser received the XMPP start tag.
+    /// </summary>
     protected virtual void FireOnStreamStart(Element e)
     {
         if (_disposed)
@@ -180,6 +183,9 @@ public class Parser : IDisposable
         }
     }
 
+    /// <summary>
+    /// Fires the event to notify that the parser received regular XMPP elements.
+    /// </summary>
     protected virtual void FireOnStreamElement(Element e)
     {
         if (_disposed)
@@ -197,7 +203,15 @@ public class Parser : IDisposable
 
     #endregion
 
-    Element? currentElement, rootElement;
+    /// <summary>
+    /// Tracking current parsed element.
+    /// </summary>
+    Element? currentElement;
+
+    /// <summary>
+    /// Tracking root element (aka jabber start/end tag).
+    /// </summary>
+    Element? rootElement;
 
     void ParseXmlInternal()
     {
@@ -305,6 +319,8 @@ public class Parser : IDisposable
         }
     }
 
+
+    /// <inheritdoc/>
     public void Dispose()
     {
         if (_disposed)
@@ -313,8 +329,14 @@ public class Parser : IDisposable
         _disposed = true;
 
         _completition.TrySetResult();
-        _cts.Cancel();
-        _cts.Dispose();
+        if (_cts != null)
+        {
+            if (!_cts.IsCancellationRequested)
+                _cts.Cancel();
+
+            _cts.Dispose();
+            _cts = default;
+        }
 
         if (_reader != null)
         {

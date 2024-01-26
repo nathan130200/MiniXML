@@ -7,6 +7,9 @@ using System.Xml;
 
 namespace MiniXML;
 
+/// <summary>
+/// Class to represent an XML element and its relationships.
+/// </summary>
 [DebuggerDisplay("{StartTag,nq}")]
 public class Element
 {
@@ -19,6 +22,9 @@ public class Element
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly Dictionary<string, string> _attributes;
 
+    /// <summary>
+    /// Instance of the synchronization object to guarantee the well-being of this object.
+    /// </summary>
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly object _syncLock = new();
 
@@ -28,27 +34,51 @@ public class Element
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     internal string? _value;
 
+    /// <summary>
+    /// Internal constructor, to initialize the main data.
+    /// </summary>
     internal Element()
     {
         _children = [];
         _attributes = [];
     }
 
+    /// <summary>
+    /// Copy constructor. Creates a copy of another element.
+    /// </summary>
+    /// <param name="other">Element that will be copied.</param>
     public Element(Element other) : this()
     {
+        ArgumentNullException.ThrowIfNull(other);
+
+        // As we are in ctor, we don't need to lock now,
+        // as there is no possibility of making changes here.
+        // We just lock the other element, thus guaranteeing
+        // an exact copy of it and avoiding making unnecessary
+        // copies of children and attributes. We just iterate over it!
+
         Name = other.Name;
 
-        foreach (var (key, value) in other.Attributes)
-            _attributes[key] = value;
-
-        foreach (var child in other.Children)
+        lock (other._syncLock)
         {
-            var newElement = new Element(child);
-            _children.Add(newElement);
-            newElement._parent = this;
+            foreach (var (key, value) in other._attributes)
+                _attributes[key] = value;
+
+            foreach (var child in other._children)
+            {
+                var newElement = new Element(child);
+                _children.Add(newElement);
+                newElement._parent = this;
+            }
         }
     }
 
+    /// <summary>
+    /// Creates a new element.
+    /// </summary>
+    /// <param name="name">Qualified name of the element.</param>
+    /// <param name="xmlns">Element namespace.</param>
+    /// <param name="text">Element content text.</param>
     public Element(string name, string? xmlns = default, string? text = default) : this()
     {
         Name = Xml.NormalizeQualifiedName(name);
@@ -59,6 +89,9 @@ public class Element
         Value = text;
     }
 
+    /// <summary>
+    /// Local name of the element.
+    /// </summary>
     public string LocalName
     {
         get
@@ -72,6 +105,9 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Prefix of the element.
+    /// </summary>
     public string? Prefix
     {
         get
@@ -85,9 +121,19 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Gets the element that owns the current element.
+    /// </summary>
     public Element? Parent => _parent;
+
+    /// <summary>
+    /// Determines whether the current element is the root element or belongs to another element.
+    /// </summary>
     public bool IsRootElement => _parent is null;
 
+    /// <summary>
+    /// Qualified name of the element.
+    /// </summary>
     public string Name
     {
         get => _name;
@@ -98,12 +144,18 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Element content text.
+    /// </summary>
     public string? Value
     {
         get => HttpUtility.HtmlDecode(_value);
         set => _value = SecurityElement.Escape(value ?? string.Empty);
     }
 
+    /// <summary>
+    /// Gets the XML of the current element's starting tag.
+    /// </summary>
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public string StartTag
     {
@@ -118,18 +170,35 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Gets the XML of the current element's ending tag.
+    /// </summary>
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public string EndTag
         => $"</{Name}>";
 
+    /// <summary>
+    /// Declares an attribute on the element.
+    /// </summary>
+    /// <param name="name">Attribute name.</param>
+    /// <param name="value">Attribute value.</param>
+    /// <exception cref="ArgumentNullException">If the attribute name or value is null.</exception>
     public void SetAttribute(string name, string value)
     {
         name = Xml.NormalizeQualifiedName(name);
+
+        ArgumentException.ThrowIfNullOrEmpty(value);
 
         lock (_syncLock)
             _attributes[name] = SecurityElement.Escape(value);
     }
 
+    /// <summary>
+    /// Gets the attribute declared on this element.
+    /// </summary>
+    /// <param name="name">Attribute name.</param>
+    /// <returns>Returns the value of the attribute or null if the attribute is not declared in this element.</returns>
+    /// <exception cref="ArgumentNullException">If the attribute name is null.</exception>
     public string? GetAttribute(string name)
     {
         name = Xml.NormalizeQualifiedName(name);
@@ -143,25 +212,36 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Update or remove an attribute on the element. If the attribute value is null, it will be removed.
+    /// </summary>
+    /// <param name="name">Attribute name.</param>
+    /// <param name="newValue">Attribute value.</param>
+    /// <returns>Returns the value of the attribute that was removed if it exists.</returns>
+    /// <exception cref="ArgumentNullException">If the attribute name is null.</exception>
     public string? UpdateOrRemoveAttribute(string name, string? newValue = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        name = Xml.NormalizeQualifiedName(name);
 
-        if (newValue is null)
-            return RemoveAttribute(name);
-        else
+        lock (_syncLock)
         {
-            name = Xml.NormalizeQualifiedName(name);
+            string? oldValue = default;
 
-            lock (_syncLock)
-            {
-                _attributes.Remove(name, out var oldValue);
+            _attributes.Remove(name, out oldValue);
+
+            if (newValue is not null)
                 _attributes[name] = newValue;
-                return oldValue;
-            }
+
+            return oldValue;
         }
     }
 
+    /// <summary>
+    /// Removes the attribute from this element.
+    /// </summary>
+    /// <param name="name">Attribute name.</param>
+    /// <returns>Returns the value of the attribute that was removed if it exists.</returns>
+    /// <exception cref="ArgumentNullException">If the attribute name is null.</exception>
     public string? RemoveAttribute(string name)
     {
         string? result = default;
@@ -174,12 +254,27 @@ public class Element
         return result;
     }
 
+    /// <summary>
+    /// Declares a namespace with no prefix on this element.
+    /// </summary>
+    /// <param name="uri">URI of the namespace that will be added.</param>
     public void SetNamespace(string uri)
-        => SetAttribute("xmlns", uri);
+        => UpdateOrRemoveAttribute("xmlns", uri);
 
+    /// <summary>
+    /// Declares a namespace with prefix on this element.
+    /// </summary>
+    /// <param name="prefix">Namespace prefix.</param>
+    /// <param name="uri">URI of the namespace that will be added.</param>
     public void SetNamespace(string prefix, string uri)
-        => SetAttribute($"xmlns:{prefix}", uri);
+        => UpdateOrRemoveAttribute($"xmlns:{prefix}", uri);
 
+    /// <summary>
+    /// Searches for the first occurrence of the child element with a provided filter and optionally recursively.
+    /// </summary>
+    /// <param name="predicate">Filter to search for the element.</param>
+    /// <param name="recursive">Indicates whether the search will be done recursively or not.</param>
+    /// <returns>The element instance found, or null if no element matches the criteria.</returns>
     public Element? FindElement(Func<Element, bool> predicate, bool recursive = false)
     {
         Element? result = default;
@@ -204,12 +299,21 @@ public class Element
         return result;
     }
 
+    /// <summary>
+    /// Determines the current namespace (without prefix) of the element.
+    /// </summary>
     public string? Namespace
     {
         get => GetNamespace();
         set => UpdateOrRemoveAttribute("xmlns", value);
     }
 
+    /// <summary>
+    /// Searches for the all occurrence of the child elements with a provided filter and optionally recursively.
+    /// </summary>
+    /// <param name="predicate">Filter to search for the element.</param>
+    /// <param name="recursive">Indicates whether the search will be done recursively or not.</param>
+    /// <returns>All elements that match the criteria or empty list if no elements were found.</returns>
     public IEnumerable<Element> FindElements(Func<Element, bool> predicate, bool recursive = false)
     {
         var result = new List<Element>();
@@ -229,6 +333,9 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Gets the list of child elements.
+    /// </summary>
     public IReadOnlyList<Element> Children
     {
         get
@@ -242,6 +349,9 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Gets a dictionary with all declared attributes.
+    /// </summary>
     public IReadOnlyDictionary<string, string> Attributes
     {
         get
@@ -255,6 +365,10 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Adds an element to its children.
+    /// </summary>
+    /// <param name="e">Element that will be added.</param>
     public void AddChild(Element e)
     {
         if (e._parent == this)
@@ -268,6 +382,10 @@ public class Element
         e._parent = this;
     }
 
+    /// <summary>
+    /// Removes an element from its children.
+    /// </summary>
+    /// <param name="e">Element that will be removed.</param>
     public void RemoveChild(Element e)
     {
         if (e._parent != this)
@@ -279,12 +397,21 @@ public class Element
         e._parent = null;
     }
 
+    /// <summary>
+    /// Removes itself from its parent element.
+    /// </summary>
     public void Remove()
     {
         _parent?.RemoveChild(this);
         _parent = default;
     }
 
+    /// <summary>
+    /// Gets the namespace declared in the element (optionally also searches for the parent element)
+    /// </summary>
+    /// <param name="prefix"><i>[optional]</i> Namespace prefix.</param>
+    /// <param name="searchInParent">Indicates whether the search will expand across the parent element.</param>
+    /// <returns>String containing the namespace value or null if not found.</returns>
     public string? GetNamespace(string? prefix = default, bool searchInParent = true)
     {
         string? value;
@@ -313,13 +440,31 @@ public class Element
         return _parent?.GetNamespace(prefix);
     }
 
+    /// <summary>
+    /// Prints all elements, attributes, content and their respective children in XML format.
+    /// </summary>
     public override string ToString()
         => ToString(false);
 
-    internal static readonly char DefaultQuoteChar = '\'';
-    internal static readonly char DefaultIndentChar = ' ';
-    internal static readonly byte DefaultIndentSize = 1;
+    /// <summary>
+    /// Standard character representing quotation marks.
+    /// </summary>
+    public static char DefaultQuoteChar { set; private get; } = '\'';
 
+    /// <summary>
+    /// Standard character representing indentation.
+    /// </summary>
+    public static char DefaultIndentChar { set; private get; } = ' ';
+
+    /// <summary>
+    /// Default size of the indentation for each XML scope.
+    /// </summary>
+    public static byte DefaultIndentSize { set; private get; }
+
+    /// <summary>
+    /// Prints all elements, attributes, content and their respective children in XML format.
+    /// </summary>
+    /// <param name="indent">Determines whether the string containing the XML will be formatted and indented. (eg: for logging purposes)</param>
     public string ToString(bool indent)
     {
         var sb = new StringBuilder();
