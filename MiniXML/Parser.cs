@@ -204,6 +204,22 @@ public class Parser : IDisposable
     #endregion
 
     /// <summary>
+    /// This function is responsible for building the element that will be dispatched later.
+    /// </summary>
+    /// <param name="name">Name of the element that was just processed.</param>
+    /// <param name="attributes">The attribute dictionary that accompanies this element.</param>
+    /// <returns>[required] An instance of a valid <see cref="Element" /> or at least one class instance that inherits from the <see cref="Element" /> class.</returns>
+    protected virtual Element CreateElement(string name, Dictionary<string, string> attributes)
+    {
+        var e = new Element(name);
+
+        foreach (var (key, value) in attributes)
+            e.SetAttribute(key, value);
+
+        return e;
+    }
+
+    /// <summary>
     /// Tracking current parsed element.
     /// </summary>
     Element? currentElement;
@@ -240,18 +256,37 @@ public class Parser : IDisposable
                     {
                         case XmlNodeType.Element:
                             {
-                                var newElem = new Element
-                                {
-                                    Name = _reader.Name
-                                };
+                                Element newElem;
 
-                                if (_reader.HasAttributes)
                                 {
-                                    while (_reader.MoveToNextAttribute())
-                                        newElem.SetAttribute(_reader.Name, _reader.Value);
+                                    var name = _reader.Name;
+                                    var attributes = new Dictionary<string, string>();
 
-                                    _reader.MoveToElement();
+                                    if (_reader.HasAttributes)
+                                    {
+                                        while (_reader.MoveToNextAttribute())
+                                            attributes[_reader.Name] = _reader.Value;
+
+                                        _reader.MoveToElement();
+                                    }
+
+                                    //
+                                    // Let's separate this and leave a factory function
+                                    // that will be responsible for creating each instance
+                                    // of the element. This is important if the developer
+                                    // wants to implement a mapping of each element type
+                                    // to inherit this parser in another class of its own.
+                                    //
+                                    // Always considering, this library is a "gateway"
+                                    // to an XML reader for XMPP. Everything should be
+                                    // as shallow as possible.
+                                    //
+
+                                    newElem = CreateElement(name, attributes);
                                 }
+
+                                if (newElem == null)
+                                    throw new InvalidOperationException("The element created with the factory function cannot be null.");
 
                                 if (newElem.Name == "stream:stream")
                                     FireOnStreamStart(rootElement = newElem);
@@ -259,7 +294,10 @@ public class Parser : IDisposable
                                 {
                                     currentElement?.AddChild(newElem);
 
-                                    if (!_reader.IsEmptyElement) // if we have an self-closing tag, don't need to push into element stack
+                                    // If we have an self-closing tag, don't
+                                    // need to push into element stack.
+
+                                    if (!_reader.IsEmptyElement)
                                         currentElement = newElem;
                                 }
                             }
