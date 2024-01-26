@@ -208,7 +208,7 @@ public class Parser : IDisposable
     /// </summary>
     /// <param name="name">Name of the element that was just processed.</param>
     /// <param name="attributes">The attribute dictionary that accompanies this element.</param>
-    /// <returns>[required] An instance of a valid <see cref="Element" /> or at least one class instance that inherits from the <see cref="Element" /> class.</returns>
+    /// <returns><b>[required]</b> An instance of a valid <see cref="Element" /> or at least one class instance that inherits from the <see cref="Element" /> class.</returns>
     protected virtual Element CreateElement(string name, Dictionary<string, string> attributes)
     {
         var e = new Element(name);
