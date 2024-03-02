@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
 
@@ -37,6 +38,24 @@ public static class Xml
             localName = XmlConvert.EncodeLocalName(source[(ofs + 1)..]);
             return true;
         }
+    }
+
+    public static Element Parse(Stream stream, Encoding encoding = default)
+    {
+        Unsafe.SkipInit(out Element result);
+
+        using (var parser = new Parser(stream, ushort.MaxValue, encoding))
+        {
+            parser.OnStreamElement += e =>
+            {
+                result = e;
+            };
+
+            while (!parser.IsEndOfStream)
+                parser.Update();
+        }
+
+        return result;
     }
 
     internal static string WriteTree(Element e, bool indent, bool innerOnly)

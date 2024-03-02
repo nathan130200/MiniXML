@@ -8,7 +8,7 @@ Element result = default!;
 
 long elapsedTime;
 
-using (var fs = File.OpenText(@".\Dummy.xml"))
+using (var fs = File.OpenRead(@".\Dummy.xml"))
 {
     Console.CursorVisible = false;
     Console.WriteLine("  -> Parsing...\n");
@@ -22,7 +22,7 @@ using (var fs = File.OpenText(@".\Dummy.xml"))
 
         var sw = Stopwatch.StartNew();
 
-        while (fs.Peek() != -1 || !parser.IsDisposed)
+        while (!parser.IsEndOfStream)
             parser.Update();
 
         elapsedTime = sw.ElapsedMilliseconds;

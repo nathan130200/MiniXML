@@ -10,31 +10,31 @@ namespace MiniXML;
 /// </summary>
 public class Parser : IDisposable
 {
-    internal XmlReader _reader;
-    internal TextReader _textReader;
-
-    private readonly bool _leaveOpen;
+    internal XmlReader _parser;
+    internal TextReader _stream;
     private volatile bool _disposed;
 
     public event Action<Element> OnStreamStart;
     public event Action<Element> OnStreamElement;
     public event Action OnStreamEnd;
 
-    public bool IsDisposed
-        => _disposed;
+    const int DefaultBufferSize = 256;
 
-    public Parser(TextReader textReader, bool leaveOpen = true)
+    public Parser(Stream inputStream, int? charBufferSize = default, Encoding encoding = default)
     {
-        _textReader = textReader;
-        _leaveOpen = leaveOpen;
+        int bufferSize = charBufferSize.GetValueOrDefault(DefaultBufferSize);
+
+        if (bufferSize <= 0)
+            bufferSize = DefaultBufferSize;
+
+        encoding ??= Encoding.UTF8;
+
+        _stream = new StreamReader(inputStream, encoding, false, bufferSize, true);
         Reset();
     }
 
-    public Parser(Stream baseStream, Encoding encoding = default)
-    {
-        _textReader = new StreamReader(baseStream, encoding ?? Encoding.UTF8, false, 256, true);
-        Reset();
-    }
+    public bool IsEndOfStream
+        => _disposed || (_parser == null || _parser.EOF);
 
     public void Dispose()
     {
@@ -43,21 +43,19 @@ public class Parser : IDisposable
 
         _disposed = true;
 
-        if (!_leaveOpen)
-        {
-            _textReader?.Dispose();
-            _textReader = null;
-        }
+        _parser?.Dispose();
+        _parser = null;
+        _stream?.Dispose();
+        _stream = null;
 
-        _reader?.Dispose();
-        _reader = null;
+        GC.SuppressFinalize(this);
     }
 
     public void Reset()
     {
-        _reader?.Dispose();
+        _parser?.Dispose();
 
-        _reader = XmlReader.Create(_textReader, new XmlReaderSettings
+        _parser = XmlReader.Create(_stream, new XmlReaderSettings
         {
             Async = true,
             CloseInput = false,
@@ -76,7 +74,7 @@ public class Parser : IDisposable
         get
         {
             CheckDisposed();
-            return _reader is IXmlLineInfo info ? info.LineNumber : 0;
+            return _parser is IXmlLineInfo info ? info.LineNumber : 0;
         }
     }
 
@@ -85,12 +83,17 @@ public class Parser : IDisposable
         get
         {
             CheckDisposed();
-            return _reader is IXmlLineInfo info ? info.LinePosition : 0;
+            return _parser is IXmlLineInfo info ? info.LinePosition : 0;
         }
     }
 
     void CheckDisposed()
-        => ObjectDisposedException.ThrowIf(_disposed, this);
+    {
+        if (_disposed)
+            Debugger.Break();
+
+        ObjectDisposedException.ThrowIf(_disposed, this);
+    }
 
     #region Dispatch Events
 
@@ -143,9 +146,9 @@ public class Parser : IDisposable
     {
         CheckDisposed();
 
-        if (!_reader.Read())
+        if (!_parser.Read())
         {
-            bool isEOF = _reader.EOF;
+            bool isEOF = _parser.EOF;
             Dispose();
 
             if (isEOF)
@@ -154,25 +157,25 @@ public class Parser : IDisposable
             throw new IOException("Unable to read XML from stream.");
         }
 
-        switch (_reader.NodeType)
+        switch (_parser.NodeType)
         {
             case XmlNodeType.Element:
                 {
-                    var newElem = new Element(_reader.Name, _reader.NamespaceURI);
+                    var newElem = new Element(_parser.Name, _parser.NamespaceURI);
 
-                    if (_reader.HasAttributes)
+                    if (_parser.HasAttributes)
                     {
-                        while (_reader.MoveToNextAttribute())
-                            newElem.SetAttribute(_reader.Name, _reader.Value);
+                        while (_parser.MoveToNextAttribute())
+                            newElem.SetAttribute(_parser.Name, _parser.Value);
 
-                        _reader.MoveToElement();
+                        _parser.MoveToElement();
                     }
 
                     if (newElem.Name == "stream:stream")
                         FireOnStreamStart(newElem);
                     else
                     {
-                        if (_reader.IsEmptyElement) // self closing tag
+                        if (_parser.IsEmptyElement) // self closing tag
                         {
                             if (currentElem == null)
                                 FireOnStreamElement(newElem);
@@ -190,20 +193,20 @@ public class Parser : IDisposable
 
             case XmlNodeType.EndElement:
                 {
-                    if (_reader.Name == "stream:stream")
+                    if (_parser.Name == "stream:stream")
                         FireOnStreamEnd();
                     else
                     {
                         Debug.Assert(currentElem != null);
 
-                        if (currentElem.Name != _reader.Name)
+                        if (currentElem.Name != _parser.Name)
                         {
                             throw new InvalidOperationException("Unexpected eng tag.")
                             {
                                 Data =
                                 {
                                     ["Expected"] = currentElem.Name,
-                                    ["Actual"] = _reader.Name
+                                    ["Actual"] = _parser.Name
                                 }
                             };
                         }
@@ -222,7 +225,7 @@ public class Parser : IDisposable
             case XmlNodeType.Text:
                 {
                     Debug.Assert(currentElem != null);
-                    currentElem.Value += _reader.Value;
+                    currentElem.Value += _parser.Value;
                 }
                 break;
 
