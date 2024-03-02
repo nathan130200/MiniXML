@@ -13,6 +13,7 @@
 		<RepositoryUrl>https://github.com/nathan130200/MiniXML</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>xml, xmpp, jabber, jabber-im</PackageTags>
+		<VersionPrefix>1.0.1</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 		<FileVersion>$(VersionPrefix)</FileVersion>
 		<IncludeSymbols>True</IncludeSymbols>
@@ -22,18 +23,6 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<NoWarn>CS1591</NoWarn>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<DebugType>portable</DebugType>
-		<IsTrimmable>True</IsTrimmable>
-		<FileAlignment>1024</FileAlignment>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DebugType>portable</DebugType>
-		<IsTrimmable>True</IsTrimmable>
-		<FileAlignment>1024</FileAlignment>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -48,22 +37,22 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <None Update="Namespaces.tt">
-	    <Generator>TextTemplatingFileGenerator</Generator>
-	    <LastGenOutput>Namespaces.g.cs</LastGenOutput>
-	  </None>
+		<None Update="Namespaces.tt">
+			<Generator>TextTemplatingFileGenerator</Generator>
+			<LastGenOutput>Namespaces.g.cs</LastGenOutput>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+		<Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Compile Update="Namespaces.g.cs">
-	    <DesignTime>True</DesignTime>
-	    <AutoGen>True</AutoGen>
-	    <DependentUpon>Namespaces.tt</DependentUpon>
-	  </Compile>
+		<Compile Update="Namespaces.g.cs">
+			<DesignTime>True</DesignTime>
+			<AutoGen>True</AutoGen>
+			<DependentUpon>Namespaces.tt</DependentUpon>
+		</Compile>
 	</ItemGroup>
 
 </Project>

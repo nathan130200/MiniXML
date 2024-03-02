@@ -11,7 +11,7 @@ long elapsedTime;
 using (var fs = File.OpenText(@".\Dummy.xml"))
 {
     Console.CursorVisible = false;
-    Console.Write(" - Parsing...");
+    Console.WriteLine("  -> Parsing...\n");
 
     using (var parser = new Parser(fs))
     {
