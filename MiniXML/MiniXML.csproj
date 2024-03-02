@@ -3,13 +3,12 @@
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<Nullable>enable</Nullable>
 		<IsPublishable>False</IsPublishable>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Title>Mini XML</Title>
 		<Authors>nathan130200</Authors>
-		<Description>Simple library for manipulating and reading XML data for the XMPP protocol around XmlReader.</Description>
+		<Description>Simple library for manipulating and reading XML data for the XMPP protocol using XmlReader.</Description>
 		<PackageProjectUrl>https://github.com/nathan130200/MiniXML</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/nathan130200/MiniXML</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
@@ -22,29 +21,49 @@
 		<Copyright>nathan130200</Copyright>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
+		<NoWarn>CS1591</NoWarn>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-	  <DebugType>portable</DebugType>
-	  <IsTrimmable>True</IsTrimmable>
-	  <FileAlignment>1024</FileAlignment>
+		<DebugType>portable</DebugType>
+		<IsTrimmable>True</IsTrimmable>
+		<FileAlignment>1024</FileAlignment>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-	  <DebugType>portable</DebugType>
-	  <IsTrimmable>True</IsTrimmable>
-	  <FileAlignment>1024</FileAlignment>
+		<DebugType>portable</DebugType>
+		<IsTrimmable>True</IsTrimmable>
+		<FileAlignment>1024</FileAlignment>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <None Include="..\LICENSE">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
+		<None Include="..\LICENSE">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Namespaces.tt">
+	    <Generator>TextTemplatingFileGenerator</Generator>
+	    <LastGenOutput>Namespaces.g.cs</LastGenOutput>
 	  </None>
-	  <None Include="..\README.md">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
-	  </None>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Namespaces.g.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Namespaces.tt</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Text;
 using System.Xml;
 
 namespace MiniXML;
@@ -8,163 +9,147 @@ namespace MiniXML;
 /// </summary>
 public static class Xml
 {
-    internal static string NormalizeQualifiedName(string qualifiedName)
+    internal static string NormalizeXmlName(this string source)
     {
-        if (string.IsNullOrWhiteSpace(qualifiedName))
-            goto fail;
+        var hasPrefix = source.DeconstructXmlName(out var local, out var prefix);
 
-        var ofs = qualifiedName.IndexOf(':');
+        if (!hasPrefix)
+            return local;
+
+        return string.Concat(prefix, ':', local);
+    }
+
+    internal static bool DeconstructXmlName(this string source, out string localName, out string prefix)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(source);
+
+        var ofs = source.IndexOf(':');
+        prefix = default;
 
         if (ofs == -1)
-            return XmlConvert.EncodeLocalName(qualifiedName);
+        {
+            localName = XmlConvert.EncodeLocalName(source);
+            return false;
+        }
         else
         {
-            var prefix = qualifiedName[0..ofs];
-            var localName = qualifiedName[(ofs + 1)..];
+            prefix = XmlConvert.EncodeLocalName(source[0..ofs]);
+            localName = XmlConvert.EncodeLocalName(source[(ofs + 1)..]);
+            return true;
+        }
+    }
 
-            if (string.IsNullOrWhiteSpace(localName))
-                goto fail;
+    internal static string WriteTree(Element e, bool indent, bool innerOnly)
+    {
+        var sb = new StringBuilder();
 
-            return string.Concat(XmlConvert.EncodeLocalName(prefix),
-                ':', XmlConvert.EncodeLocalName(localName));
+        using (var sw = new StringWriter(sb))
+        {
+
+            var settings = new XmlWriterSettings
+            {
+                Indent = indent,
+                IndentChars = " ",
+                CloseOutput = true,
+                ConformanceLevel = ConformanceLevel.Fragment,
+                OmitXmlDeclaration = true,
+                NamespaceHandling = NamespaceHandling.OmitDuplicates,
+                Encoding = Encoding.UTF8
+            };
+
+            using var writer = XmlWriter.Create(sw, settings);
+            WriteTreeInternal(e, writer, innerOnly);
         }
 
-    fail:
-        throw new ArgumentNullException(nameof(qualifiedName), "Local name cannot be null or empty.");
+        return sb.ToString();
     }
 
-    internal static string SerializeToXml(object rawValue)
+    static void WriteTreeInternal(Element e, XmlWriter w, bool innerOnly)
     {
-        string value;
+        if (!innerOnly)
+        {
+            var prefix = e.Prefix;
+            var localName = e.LocalName;
+            var ns = e.GetNamespace(prefix);
 
-        if (rawValue is string s)
-            value = s;
-        else if (rawValue is null)
-            value = string.Empty;
-        else if (rawValue is IFormattable fmt)
-            value = fmt.ToString(default, CultureInfo.InvariantCulture);
-        else
-            value = rawValue.ToString() ?? string.Empty;
+            if (prefix == null)
+                w.WriteStartElement(localName, ns);
+            else
+                w.WriteStartElement(prefix, localName, ns);
 
-        return value;
+            foreach (var (name, value) in e.Attributes)
+            {
+                var hasPrefix = name.DeconstructXmlName(out localName, out prefix);
+
+                if (!hasPrefix)
+                    w.WriteAttributeString(name, value);
+                else
+                {
+                    if (prefix == "xml")
+                        w.WriteAttributeString(localName, Namespaces.Xml, value);
+                    else if (prefix == "xmlns")
+                        w.WriteAttributeString(localName, Namespaces.Xmlns, value);
+                    else
+                        w.WriteAttributeString(localName, e.GetNamespace(prefix) ?? string.Empty, value);
+                }
+            }
+        }
+
+        if (e.Value != null)
+            w.WriteValue(e.Value);
+
+        foreach (var child in e.Children)
+            WriteTreeInternal(child, w, false);
+
+        if (!innerOnly)
+            w.WriteEndElement();
     }
 
-    /// <summary>
-    /// Declares a dictionary of attributes on the given element.
-    /// </summary>
-    /// <param name="element">Element that will receive the attributes.</param>
-    /// <param name="attrs">Dictionary of attributes that will be assigned to the element.</param>
-    /// <returns>Returns the element instance itself for nesting other methods.</returns>
-    public static Element Attrs(this Element element, in Dictionary<string, object>? attrs)
+    public static Element Element(string name, string xmlns = default, string text = default)
+        => new(name, xmlns, text);
+
+    public static Element C(this Element parent, string name, string xmlns = default, string text = default)
     {
-        ArgumentNullException.ThrowIfNull(element);
-
-        if (attrs == null)
-            goto next;
-
-        foreach (var (key, value) in attrs)
-            element.SetAttribute(key, SerializeToXml(value));
-
-        next:
-        return element;
-    }
-
-    /// <summary>
-    /// Declare an attribute on the specified element.
-    /// </summary>
-    /// <param name="element">Element that will receive the attribute.</param>
-    /// <param name="name">Attribute name.</param>
-    /// <param name="value">Value assigned to the attribute.</param>
-    /// <returns>Returns the element instance itself for nesting other methods.</returns>
-    public static Element Attr(this Element element, string name, object value)
-    {
-        ArgumentNullException.ThrowIfNull(element);
-        element.SetAttribute(name, SerializeToXml(value));
-        return element;
-    }
-
-    /// <summary>
-    /// Creates a new instance of an element.
-    /// </summary>
-    /// <param name="name">Element qualified tag name.</param>
-    /// <param name="attrs">Dictionary of attributes that will be assigned to the element.</param>
-    /// <returns>Returns the element instance created for nesting other methods.</returns>
-    public static Element Element(string name, in Dictionary<string, object>? attrs = default)
-    {
-        var child = new Element(name);
-        Attrs(child, attrs);
+        var child = new @Element(name, xmlns, text);
+        parent.AddChild(child);
         return child;
     }
 
-    /// <summary>
-    /// Declares a child element in the given element.
-    /// </summary>
-    /// <param name="element">Parent element that will receive the child element.</param>
-    /// <param name="name">Element qualified tag name.</param>
-    /// <param name="xmlns"><i>[optional]</i> XML namespace that will be assigned</param>
-    /// <param name="attrs"><i>[optional]</i> Dictionary of attributes that will be assigned to the element.</param>
-    /// <returns>Returns the element instance for nesting other methods.</returns>
-    public static Element Child(this Element element, string name, string xmlns, in Dictionary<string, object>? attrs = default)
+    public static Element C(this Element parent, Element child)
     {
-        var child = new Element(name, xmlns);
-        element?.AddChild(child.Attrs(attrs));
+        parent.AddChild(child);
+        return parent;
+    }
+
+    public static Element Up(this Element child)
+        => child.Parent;
+
+    public static Element Root(this Element child)
+    {
+        while (!child.IsRootElement)
+            child = child.Parent;
+
         return child;
     }
 
-    /// <summary>
-    /// Declares a child element in the given element.
-    /// </summary>
-    /// <param name="element">Parent element that will receive the child element.</param>
-    /// <param name="name">Element qualified tag name.</param>
-    /// <param name="attrs"><i>[optional]</i> Dictionary of attributes that will be assigned to the element.</param>
-    /// <returns>Returns the element instance for nesting other methods.</returns>
-    public static Element Child(this Element element, string name, in Dictionary<string, object>? attrs = default)
+    public static TValue GetAttributeValue<TValue>(this Element e, string name, TValue defaultValue = default, IFormatProvider provider = default)
+        where TValue : IParsable<TValue>
     {
-        var child = new Element(name);
-        element?.AddChild(child);
-        return child;
+        var attrVal = e.GetAttribute(name);
+
+        if (attrVal != null)
+            if (TValue.TryParse(attrVal, provider ?? CultureInfo.InvariantCulture, out var result))
+                return result;
+
+        return defaultValue;
     }
 
-    /// <summary>
-    /// Returns the root element of the current element tree.
-    /// </summary>
-    /// <param name="element">Child element that will be checked.</param>
-    /// <returns>Returns the root element or itself if it is already the root element</returns>
-    public static Element Root(this Element element)
+    public static void SetAttributeValue<TValue>(this Element e, string name, TValue value, string format = default, IFormatProvider provider = default)
+        where TValue : IFormattable
     {
-        ArgumentNullException.ThrowIfNull(element);
+        if (value is decimal or double or float)
+            format ??= "F6";
 
-        while (!element.IsRootElement)
-            element = element.Parent!;
-
-        return element;
-    }
-
-    /// <summary>
-    /// Returns the parent element.
-    /// </summary>
-    /// <param name="element">Child element that will be checked.</param>
-    /// <returns>Returns the parent element it belongs to.</returns>
-    public static Element Up(this Element element)
-    {
-        ArgumentNullException.ThrowIfNull(element);
-
-        if (element.IsRootElement)
-            return element;
-
-        return element.Parent!;
-    }
-
-    /// <summary>
-    /// Sets the text content of the current element.
-    /// </summary>
-    /// <param name="element">Current element that will have its text changed.</param>
-    /// <param name="text"><i>[optional]</i> Text content of the element.</param>
-    /// <returns>Returns the element instance for nesting other methods.</returns>
-    public static Element Text(this Element element, string? text = default)
-    {
-        ArgumentNullException.ThrowIfNull(element);
-        element.Value = text;
-        return element;
+        e.SetAttribute(name, value?.ToString(format, provider ?? CultureInfo.InvariantCulture) ?? string.Empty);
     }
 }
