@@ -65,6 +65,8 @@ public static class Xml
         return result;
     }
 
+    internal static string IndentChar = "  ";
+
     internal static string WriteTree(Element e, bool indent, bool innerOnly)
     {
         var sb = new StringBuilder();
@@ -75,7 +77,7 @@ public static class Xml
             var settings = new XmlWriterSettings
             {
                 Indent = indent,
-                IndentChars = " ",
+                IndentChars = IndentChar,
                 CloseOutput = true,
                 ConformanceLevel = ConformanceLevel.Fragment,
                 OmitXmlDeclaration = true,

@@ -1,7 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Security;
 using System.Text;
-using System.Web;
 
 namespace MiniXML;
 
@@ -133,7 +131,7 @@ public class Element
     public string Value
     {
         get => _value;
-        set => _value = HttpUtility.HtmlEncode(value);
+        set => _value = value;
     }
 
     /// <summary>
@@ -147,7 +145,7 @@ public class Element
             var sb = new StringBuilder().AppendFormat("<{0}", Name);
 
             foreach (var (key, value) in Attributes)
-                sb.AppendFormat(" {0}=\"{1}\"", key, SecurityElement.Escape(value));
+                sb.AppendFormat(" {0}=\"{1}\"", key, value);
 
             return sb.Append('>').ToString();
         }
@@ -172,7 +170,7 @@ public class Element
         lock (_attributes)
         {
             if (value != null)
-                _attributes[name] = SecurityElement.Escape(value);
+                _attributes[name] = value;
             else
                 _attributes.Remove(name);
         }
@@ -311,7 +309,7 @@ public class Element
             KeyValuePair<string, string>[] result;
 
             lock (_attributes)
-                result = [.. _attributes];
+                result = _attributes.ToArray();
 
             return result.ToDictionary(x => x.Key, x => x.Value);
         }

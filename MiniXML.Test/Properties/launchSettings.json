@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MiniXML.Test": {
+      "commandName": "Project",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}

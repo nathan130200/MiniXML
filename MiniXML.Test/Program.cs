@@ -1,25 +1,8 @@
 ﻿using MiniXML;
 
-Console.WriteLine("Press any key to start parsing XML from file.");
-Console.ReadKey(true);
+var result = Xml.Element("r");
 
-Element result = default!;
-
-double elapsedTime;
-
-using (var fs = File.OpenRead(@".\Dummy.xml"))
-{
-    Console.CursorVisible = false;
-    Console.WriteLine("  -> Parsing...\n");
-    var lastTime = DateTime.Now;
+using (var fs = File.OpenRead(@".\Input.xml"))
     result = Xml.Parse(fs);
-    elapsedTime = (DateTime.Now - lastTime).TotalMilliseconds;
-}
 
-Console.CursorVisible = true;
-
-Console.WriteLine($"\nParsing completed! Took {elapsedTime:F2}ms\n\n");
-Console.ReadKey(true);
-
-Console.WriteLine(result.ToString());
-Console.ReadKey(true);
+File.WriteAllText(@".\Output.xml", result.ToString(false));
