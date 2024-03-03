@@ -37,7 +37,7 @@ foreach (var entry in root.Elements())
 
 sb.Append('\n').Append('}');
 
-File.WriteAllText(@"..\MiniXML\Namespaces.cs", sb.ToString());
+File.WriteAllText(@"..\MiniXML\Namespace.cs", sb.ToString());
 
 void WriteDocString(string ns, string? desc, string? webPage)
 {

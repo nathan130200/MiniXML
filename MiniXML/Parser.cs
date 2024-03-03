@@ -16,13 +16,32 @@ public class Parser : IDisposable
     private readonly int _bufferSize;
     private readonly Encoding _encoding;
 
+    /// <summary>
+    /// Event triggered when the opening XML tag <c><![CDATA[<stream:stream>]]></c> of the XMPP protocol is parsed.
+    /// </summary>
     public event Action<Element> OnStreamStart;
+
+    /// <summary>
+    /// Event triggered when the closing XML tag <c><![CDATA[</stream:stream>]]></c> of the XMPP protocol is parsed.
+    /// </summary>
     public event Action<Element> OnStreamElement;
+
+    /// <summary>
+    /// The event is fired when parsing a complete element (Well formed xml element).
+    /// </summary>
     public event Action OnStreamEnd;
 
-    public Parser(Stream baseStream, int charBufferSize = 256, Encoding encoding = default)
+    /// <summary>
+    /// Initializes a new parser instance.
+    /// </summary>
+    /// <param name="baseStream">Stream in which used to read XML.</param>
+    /// <param name="bufferSize">Buffer size of the parser's internal characters. Defaults to: <c>256 chars</c></param>
+    /// <param name="encoding">Encoding of characters to be used. Defaults to: <seealso cref="Encoding.UTF8"/></param>
+    public Parser(Stream baseStream, int bufferSize = 256, Encoding encoding = default)
     {
-        _bufferSize = charBufferSize <= 0 ? 256 : charBufferSize;
+        ArgumentNullException.ThrowIfNull(baseStream);
+
+        _bufferSize = bufferSize <= 0 ? 256 : bufferSize;
         _encoding = encoding ?? Encoding.UTF8;
         Reset(baseStream);
     }
@@ -46,7 +65,7 @@ public class Parser : IDisposable
     }
 
     /// <summary>
-    /// Internally restarts the parser, clearing the previous state and its data.
+    /// Restarts the parser, clearing the previous state and its data.
     /// </summary>
     /// <param name="newStream">Specifies which data stream the parser will process. If not specified, it will keep the same stream as before.</param>
     public void Reset(Stream newStream = default)

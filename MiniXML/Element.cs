@@ -5,6 +5,9 @@ using System.Web;
 
 namespace MiniXML;
 
+/// <summary>
+/// Base class responsible for managing an XML element.
+/// </summary>
 [DebuggerDisplay("{StartTag,nq}")]
 public class Element
 {
@@ -23,29 +26,39 @@ public class Element
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     internal string _value;
 
+    /// <summary>
+    /// Internal constructor.
+    /// </summary>
     internal Element()
     {
         _children = [];
         _attributes = [];
     }
 
-    public Element(Element other) : this()
-    {
-        ArgumentNullException.ThrowIfNull(other);
+    // TODO: Unstable!
+    //public Element(Element other) : this()
+    //{
+    //    ArgumentNullException.ThrowIfNull(other);
 
-        Name = other.Name;
+    //    Name = other.Name;
 
-        foreach (var (key, value) in other.Attributes)
-            _attributes[key] = value;
+    //    foreach (var (key, value) in other.Attributes)
+    //        _attributes[key] = value;
 
-        foreach (var child in other.Children)
-        {
-            var copy = new Element(child);
-            _children.Add(copy);
-            copy._parent = this;
-        }
-    }
+    //    foreach (var child in other.Children)
+    //    {
+    //        var copy = new Element(child);
+    //        _children.Add(copy);
+    //        copy._parent = this;
+    //    }
+    //}
 
+    /// <summary>
+    /// Creates an instance of Element.
+    /// </summary>
+    /// <param name="name">Qualified name.</param>
+    /// <param name="xmlns">Namespace URI.</param>
+    /// <param name="text">Text content.</param>
     public Element(string name, string xmlns = default, string text = default) : this()
     {
         Name = Xml.NormalizeXmlName(name);
@@ -61,18 +74,30 @@ public class Element
         Value = text;
     }
 
+    /// <summary>
+    /// Gets the parent element of this element.
+    /// </summary>
     public Element Parent
         => _parent;
 
+    /// <summary>
+    /// Determines whether this element is the root element.
+    /// </summary>
     public bool IsRootElement
         => _parent is null;
 
+    /// <summary>
+    /// Gets the prefix of the element's qualified name.
+    /// </summary>
     public string Prefix
     {
         get => _prefix;
         set => _prefix = string.IsNullOrWhiteSpace(value) ? null : value;
     }
 
+    /// <summary>
+    /// Gets the local name of the element's qualified name.
+    /// </summary>
     public string LocalName
     {
         get => _localName;
@@ -83,6 +108,9 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Gets the qualified name of the element.
+    /// </summary>
     public string Name
     {
         get
@@ -99,12 +127,19 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Text content of the element. 
+    /// </summary>
     public string Value
     {
         get => _value;
         set => _value = HttpUtility.HtmlEncode(value);
     }
 
+    /// <summary>
+    /// Gets the opening tag of this element.
+    /// </summary>
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public string StartTag
     {
         get
@@ -118,10 +153,18 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Gets the closing tag of this element.
+    /// </summary>
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public string EndTag
         => $"</{Name}>";
 
+    /// <summary>
+    /// Set an attribute on this element.
+    /// </summary>
+    /// <param name="name">Attribute qualified name.</param>
+    /// <param name="value">Attribute value. If the attribute value is <see langword="null" />, it will remove the attribute.</param>
     public void SetAttribute(string name, string value)
     {
         name = Xml.NormalizeXmlName(name);
@@ -135,6 +178,11 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Gets the attribute value in this element.
+    /// </summary>
+    /// <param name="name">Attribute qualified name.</param>
+    /// <returns>Returns the value of the attribute, or <see langword="null" /> if the attribute is not found.</returns>
     public string GetAttribute(string name)
     {
         name = Xml.NormalizeXmlName(name);
@@ -148,6 +196,10 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Gets the attribute value in this element.
+    /// </summary>
+    /// <param name="name">Attribute qualified name.</param>
     public void RemoveAttribute(string name)
     {
         name = Xml.NormalizeXmlName(name);
@@ -156,9 +208,18 @@ public class Element
             _attributes.Remove(name);
     }
 
+    /// <summary>
+    /// Sets the default namespace.
+    /// </summary>
+    /// <param name="uri">Namespace URI.</param>
     public void SetNamespace(string uri)
         => SetAttribute("xmlns", uri);
 
+    /// <summary>
+    /// Set XML namespace with prefix.
+    /// </summary>
+    /// <param name="prefix">Namespace Prefix.</param>
+    /// <param name="uri">Namespace URI.</param>
     public void SetNamespace(string prefix, string uri)
         => SetAttribute($"xmlns:{prefix}", uri);
 
@@ -188,12 +249,21 @@ public class Element
         return result;
     }
 
+    /// <summary>
+    /// Default element namespace.
+    /// </summary>
     public string DefaultNamespace
     {
         get => GetNamespace();
         set => SetNamespace(value);
     }
 
+    /// <summary>
+    /// Searches the element for subelements with the specified criteria.
+    /// </summary>
+    /// <param name="predicate">Predicate to query the elements.</param>
+    /// <param name="recursive">If true, it searches the elements and all their descendants.</param>
+    /// <returns>A list of the elements found.</returns>
     public IReadOnlyList<Element> GetChildren(Func<Element, bool> predicate, bool recursive = false)
     {
         ArgumentNullException.ThrowIfNull(predicate);
@@ -215,6 +285,9 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// List of child elements that belong to this element.
+    /// </summary>
     public IReadOnlyList<Element> Children
     {
         get
@@ -228,6 +301,9 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Dictionary of the attributes of this element.
+    /// </summary>
     public IReadOnlyDictionary<string, string> Attributes
     {
         get
@@ -241,6 +317,10 @@ public class Element
         }
     }
 
+    /// <summary>
+    /// Adds a child element.
+    /// </summary>
+    /// <param name="e">Element that will be added.</param>
     public void AddChild(Element e)
     {
         e.Remove();
@@ -251,6 +331,10 @@ public class Element
         e._parent = this;
     }
 
+    /// <summary>
+    /// Removes a child element.
+    /// </summary>
+    /// <param name="e">Element that will be removed.</param>
     public void RemoveChild(Element e)
     {
         if (e._parent != this)
@@ -262,13 +346,24 @@ public class Element
         e._parent = null;
     }
 
+    /// <summary>
+    /// Removes itself from the parent element.
+    /// </summary>
     public void Remove()
     {
         _parent?.RemoveChild(this);
         _parent = default;
     }
 
-    public string GetNamespace(string? prefix = default)
+    /// <summary>
+    /// Gets the namespace of the element.
+    /// </summary>
+    /// <param name="prefix"><i>Optionally</i> the prefix of the namespace that will be queried</param>
+    /// <returns>The namespace URI found, or <see langword="null" /> if not defined in any scope.</returns>
+    /// <remarks>
+    /// The namespace is inherited from parent to child, so the search will also be performed on the parent elements and their parents as well.
+    /// </remarks>
+    public string GetNamespace(string prefix = default)
     {
         string value;
 
@@ -290,16 +385,29 @@ public class Element
         return _parent?.GetNamespace(prefix);
     }
 
+    /// <summary>
+    /// Determines whether this element is a childless element.
+    /// </summary>
     public bool IsEmptyElement
         => !Children.Any();
 
+    /// <summary>
+    /// Gets the inner xml of the current element.
+    /// </summary>
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public string InnerXml
         => Xml.WriteTree(this, false, true);
 
+    /// <summary>
+    /// Converts the element instance to XML representation (without formatting).
+    /// </summary>
     public override string ToString()
         => ToString(false);
 
+    /// <summary>
+    /// Converts the element instance to XML representation
+    /// </summary>
+    /// <param name="indent">Determines whether the representation will be formatted nicely.</param>
     public string ToString(bool indent)
         => Xml.WriteTree(this, indent, false);
 }

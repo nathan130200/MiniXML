@@ -40,11 +40,18 @@ public static class Xml
         }
     }
 
-    public static Element Parse(Stream stream, Encoding encoding = default)
+    /// <summary>
+    /// Inline parses the provided XML content and returns the element.
+    /// </summary>
+    /// <param name="stream">Stream that will be used for reading.</param>
+    /// <param name="bufferSize">Internal read buffer size.</param>
+    /// <param name="encoding">Determines the character encoding. Defaults to: <see cref="Encoding.UTF8"/></param>
+    /// <returns>Instance of the well-formed element that was read.</returns>
+    public static Element Parse(Stream stream, int bufferSize = ushort.MaxValue, Encoding encoding = default)
     {
         Unsafe.SkipInit(out Element result);
 
-        using (var parser = new Parser(stream, ushort.MaxValue, encoding))
+        using (var parser = new Parser(stream, bufferSize, encoding))
         {
             parser.OnStreamElement += e =>
             {
@@ -124,9 +131,24 @@ public static class Xml
             w.WriteEndElement();
     }
 
+    /// <summary>
+    /// Helper function that creates a new element.
+    /// </summary>
+    /// <param name="name">Qualified name of the element.</param>
+    /// <param name="xmlns">Element namespace.</param>
+    /// <param name="text">Text content of the element.</param>
+    /// <returns>Instance of the created element.</returns>
     public static Element Element(string name, string xmlns = default, string text = default)
         => new(name, xmlns, text);
 
+    /// <summary>
+    /// Creates a child element.
+    /// </summary>
+    /// <param name="parent">Instance of the parent element.</param>
+    /// <param name="name">Qualified name of the element.</param>
+    /// <param name="xmlns">Element namespace.</param>
+    /// <param name="text">Text content of the element.</param>
+    /// <returns>Instance of the created child element.</returns>
     public static Element C(this Element parent, string name, string xmlns = default, string text = default)
     {
         var child = new @Element(name, xmlns, text);
@@ -134,15 +156,31 @@ public static class Xml
         return child;
     }
 
+    /// <summary>
+    /// Add a child element instance to parent.
+    /// </summary>
+    /// <param name="parent">Instance of the parent element.</param>
+    /// <param name="child">Instance of the child element</param>
+    /// <returns>Parent element instance.</returns>
     public static Element C(this Element parent, Element child)
     {
         parent.AddChild(child);
         return parent;
     }
 
+    /// <summary>
+    /// Moves up the element hierarchy to the parent element of the current element.
+    /// </summary>
+    /// <param name="child">Instance of the child element</param>
+    /// <returns>Parent element instance.</returns>
     public static Element Up(this Element child)
         => child.Parent;
 
+    /// <summary>
+    /// Gets the root element from the current element
+    /// </summary>
+    /// <param name="child">Instance of the child element</param>
+    /// <returns>Root element instance.</returns>
     public static Element Root(this Element child)
     {
         while (!child.IsRootElement)
@@ -151,6 +189,15 @@ public static class Xml
         return child;
     }
 
+    /// <summary>
+    /// Gets the value of the attribute that will be converted to its appropriate type.
+    /// </summary>
+    /// <typeparam name="TValue">Type that implements the <see cref="IParsable{TValue}"/> interface for conversion.</typeparam>
+    /// <param name="e">Element instance.</param>
+    /// <param name="name">Attribute name.</param>
+    /// <param name="defaultValue">Fallback attribute value.</param>
+    /// <param name="provider"><i>Optional</i> format provider for custom formatting.</param>
+    /// <returns>The converted attribute value, or the <paramref name="defaultValue"/> value if a problem occurred or the attribute does not exist.</returns>
     public static TValue GetAttributeValue<TValue>(this Element e, string name, TValue defaultValue = default, IFormatProvider provider = default)
         where TValue : IParsable<TValue>
     {
@@ -163,6 +210,15 @@ public static class Xml
         return defaultValue;
     }
 
+    /// <summary>
+    /// Sets the attribute on the element.
+    /// </summary>
+    /// <typeparam name="TValue">Type that implements the <see cref="IFormattable"/> interface for conversion.</typeparam>
+    /// <param name="e">Element instance.</param>
+    /// <param name="name">Attribute name.</param>
+    /// <param name="value">Attribute value in current type.</param>
+    /// <param name="format"><i>Optional</i> format during conversion to string.</param>
+    /// <param name="provider"><i>Optional</i> format provider for custom formatting.</param>
     public static void SetAttributeValue<TValue>(this Element e, string name, TValue value, string format = default, IFormatProvider provider = default)
         where TValue : IFormattable
     {

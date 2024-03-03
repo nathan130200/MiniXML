@@ -16,7 +16,6 @@
 		<VersionPrefix>1.0.4</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 		<FileVersion>$(VersionPrefix)</FileVersion>
-		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Copyright>nathan130200</Copyright>
@@ -26,8 +25,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<DebugType>full</DebugType>
+		<DebugType>embedded</DebugType>
 		<DebugSymbols>true</DebugSymbols>
+		<!--<IncludeSymbols>true</IncludeSymbols>-->
 	</PropertyGroup>
 
 	<ItemGroup>
