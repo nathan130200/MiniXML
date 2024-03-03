@@ -48,11 +48,6 @@
 	<item name="DataFormsLayout" value="http://jabber.org/protocol/xdata-layout" comment="XEP-0141: Data Forms Layout" help="https://xmpp.org/extensions/xep-0141.html" />
 	<item name="DataFormsValidation" value="http://jabber.org/protocol/xdata-validate" comment="XEP-0122: Data Forms Validation" help="https://xmpp.org/extensions/xep-0122.html" />
 
-	<section comment="RFC-6121: XMPP-IM" help="https://www.ietf.org/rfc/rfc6121.txt">
-		<item name="Client" value="jabber:client" />
-		<item name="Server" value="jabber:server" />
-	</section>
-
 	<section comment="XEP-0114: Existing Component Protocol" help="https://xmpp.org/extensions/xep-0114.html">
 		<item name="Accept" value="jabber:component:accept" />
 		<item name="Connect" value="jabber:component:connect" />
@@ -62,23 +57,22 @@
 	<item name="IqGateway" value="jabber:iq:gateway" comment="XEP-0100: Gateway Interaction" help="https://xmpp.org/extensions/xep-0100.html" />
 	<item name="IqLast" value="jabber:iq:last" comment="XEP-0012: Last Activity" help="https://xmpp.org/extensions/xep-0012.html" />
 	<item name="IqOob" value="jabber:iq:oob" comment="XEP-0066: Out of Band Data" help="https://xmpp.org/extensions/xep-0066.html" />
-	<item name="IqPrivacy" value="jabber:iq:privacy" comment="RFC-6121: XMPP-IM" help="https://www.ietf.org/rfc/rfc6121.txt" />
+	<item name="IqPrivacy" value="jabber:iq:privacy" comment="XEP-0016: Privacy Lists" help="https://xmpp.org/extensions/xep-0016.html" />
 	<item name="IqPrivate" value="jabber:iq:private" comment="XEP-0049: Private XML Storage" help="https://xmpp.org/extensions/xep-0049.html" />
 	<item name="IqRegister" value="jabber:iq:register" comment="XEP-0077: In-Band Registration" help="https://xmpp.org/extensions/xep-0077.html" />
-	<item name="IqRoster" value="jabber:iq:roster" comment="RFC-6121: XMPP-IM" help="https://www.ietf.org/rfc/rfc6121.txt" />
+	<item name="IqRoster" value="jabber:iq:roster" comment="XEP-0321: Remote Roster Management" help="https://xmpp.org/extensions/xep-0321.html" />
 	<item name="IqRpc" value="jabber:iq:rpc" comment="XEP-0009: Jabber-RPC" help="https://xmpp.org/extensions/xep-0009.html" />
 	<item name="IqSearch" value="jabber:iq:search" comment="XEP-0055: Jabber Search" help="https://xmpp.org/extensions/xep-0055.html" />
 	<item name="IqVersion" value="jabber:iq:version" comment="XEP-0092: Software Version" help="https://xmpp.org/extensions/xep-0092.html" />
-
-	<item name="Dialback" value="jabber:server:dialback"
-		  comment="XEP-0220: Server Dialback" help="https://xmpp.org/extensions/xep-0220.html" />
-
+	<item name="Dialback" value="jabber:server:dialback" comment="XEP-0220: Server Dialback" help="https://xmpp.org/extensions/xep-0220.html" />
 	<item name="DirectMuc" value="jabber:x:conference" comment="XEP-0249: Direct MUC Invitations" help="https://xmpp.org/extensions/xep-0249.html" />
 	<item name="DataForms" value="jabber:x:data" comment="XEP-0004: Data Forms" help="https://xmpp.org/extensions/xep-0004.html" />
 	<item name="Oob" value="jabber:x:oob" comment="XEP-0066: Out of Band Data" help="https://xmpp.org/extensions/xep-0066.html" />
 	<item name="RosterDdelimiter" value="roster:delimiter" comment="XEP-0083: Nested Roster Groups" help="https://xmpp.org/extensions/xep-0083.html" />
 
-	<section comment="RFC 6120: XMPP Core" help="https://xmpp.org/rfcs/rfc6120.html">
+	<section comment="RFC-6120: XMPP Core" help="https://xmpp.org/rfcs/rfc6120.html">
+		<item name="Client" value="jabber:client" />
+		<item name="Server" value="jabber:server" />
 		<item name="Bind" value="urn:ietf:params:xml:ns:xmpp-bind" />
 		<item name="Sasl" value="urn:ietf:params:xml:ns:xmpp-sasl" />
 		<item name="Session" value="urn:ietf:params:xml:ns:xmpp-session" />

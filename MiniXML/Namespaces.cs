@@ -163,16 +163,6 @@ public static class Namespace
 	public const string DataFormsValidation = "http://jabber.org/protocol/xdata-validate";
 
 	/// <summary>
-	/// <a href="https://www.ietf.org/rfc/rfc6121.txt">RFC-6121: XMPP-IM</a> — <c>jabber:client</c>
-	/// </summary>
-	public const string Client = "jabber:client";
-
-	/// <summary>
-	/// <a href="https://www.ietf.org/rfc/rfc6121.txt">RFC-6121: XMPP-IM</a> — <c>jabber:server</c>
-	/// </summary>
-	public const string Server = "jabber:server";
-
-	/// <summary>
 	/// <a href="https://xmpp.org/extensions/xep-0114.html">XEP-0114: Existing Component Protocol</a> — <c>jabber:component:accept</c>
 	/// </summary>
 	public const string Accept = "jabber:component:accept";
@@ -203,7 +193,7 @@ public static class Namespace
 	public const string IqOob = "jabber:iq:oob";
 
 	/// <summary>
-	/// <a href="https://www.ietf.org/rfc/rfc6121.txt">RFC-6121: XMPP-IM</a> — <c>jabber:iq:privacy</c>
+	/// <a href="https://xmpp.org/extensions/xep-0016.html">XEP-0016: Privacy Lists</a> — <c>jabber:iq:privacy</c>
 	/// </summary>
 	public const string IqPrivacy = "jabber:iq:privacy";
 
@@ -218,7 +208,7 @@ public static class Namespace
 	public const string IqRegister = "jabber:iq:register";
 
 	/// <summary>
-	/// <a href="https://www.ietf.org/rfc/rfc6121.txt">RFC-6121: XMPP-IM</a> — <c>jabber:iq:roster</c>
+	/// <a href="https://xmpp.org/extensions/xep-0321.html">XEP-0321: Remote Roster Management</a> — <c>jabber:iq:roster</c>
 	/// </summary>
 	public const string IqRoster = "jabber:iq:roster";
 
@@ -263,32 +253,42 @@ public static class Namespace
 	public const string RosterDdelimiter = "roster:delimiter";
 
 	/// <summary>
-	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC 6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-bind</c>
+	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC-6120: XMPP Core</a> — <c>jabber:client</c>
+	/// </summary>
+	public const string Client = "jabber:client";
+
+	/// <summary>
+	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC-6120: XMPP Core</a> — <c>jabber:server</c>
+	/// </summary>
+	public const string Server = "jabber:server";
+
+	/// <summary>
+	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC-6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-bind</c>
 	/// </summary>
 	public const string Bind = "urn:ietf:params:xml:ns:xmpp-bind";
 
 	/// <summary>
-	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC 6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-sasl</c>
+	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC-6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-sasl</c>
 	/// </summary>
 	public const string Sasl = "urn:ietf:params:xml:ns:xmpp-sasl";
 
 	/// <summary>
-	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC 6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-session</c>
+	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC-6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-session</c>
 	/// </summary>
 	public const string Session = "urn:ietf:params:xml:ns:xmpp-session";
 
 	/// <summary>
-	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC 6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-stanzas</c>
+	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC-6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-stanzas</c>
 	/// </summary>
 	public const string Stanzas = "urn:ietf:params:xml:ns:xmpp-stanzas";
 
 	/// <summary>
-	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC 6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-streams</c>
+	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC-6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-streams</c>
 	/// </summary>
 	public const string Streams = "urn:ietf:params:xml:ns:xmpp-streams";
 
 	/// <summary>
-	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC 6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-tls</c>
+	/// <a href="https://xmpp.org/rfcs/rfc6120.html">RFC-6120: XMPP Core</a> — <c>urn:ietf:params:xml:ns:xmpp-tls</c>
 	/// </summary>
 	public const string Tls = "urn:ietf:params:xml:ns:xmpp-tls";
 
