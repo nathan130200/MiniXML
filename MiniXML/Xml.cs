@@ -105,9 +105,9 @@ public static class Xml
                 else
                 {
                     if (prefix == "xml")
-                        w.WriteAttributeString(localName, Namespaces.Xml, value);
+                        w.WriteAttributeString(localName, Namespace.Xml, value);
                     else if (prefix == "xmlns")
-                        w.WriteAttributeString(localName, Namespaces.Xmlns, value);
+                        w.WriteAttributeString(localName, Namespace.Xmlns, value);
                     else
                         w.WriteAttributeString(localName, e.GetNamespace(prefix) ?? string.Empty, value);
                 }

@@ -1,0 +1,108 @@
+<content>
+	<item name="Xml" value="http://www.w3.org/XML/1998/namespace" comment="W3C: Xml Namespace" help="http://www.w3.org/XML/1998/namespace" />
+	<item name="Xmlns" value="http://www.w3.org/2000/xmlns/" comment="W3C: Xmlns Namespace" help="http://www.w3.org/2000/xmlns/" />
+	<item name="UserActivity" value="http://jabber.org/protocol/activity" comment="XEP-0108: User Activity" help="https://xmpp.org/extensions/xep-0108.html" />
+	<item name="ExtendedStanzaAddressing" value="http://jabber.org/protocol/address" comment="XEP-0033: Extended Stanza Addressing" help="https://xmpp.org/extensions/xep-0033.html" />
+
+	<section comment="XEP-0079: Advanced Message Processing" help="https://xmpp.org/extensions/xep-0079.html">
+		<item name="Amp" value="http://jabber.org/protocol/amp" />
+		<item name="AmpErrors" value="http://jabber.org/protocol/amp#errors" />
+	</section>
+
+	<item name="ByteStreams" value="http://jabber.org/protocol/bytestreams" comment="XEP-0065: SOCKS5 Bytestreams" help="https://xmpp.org/extensions/xep-0065.html" />
+	<item name="EntityCapabilities" value="http://jabber.org/protocol/caps" comment="XEP-0115: Entity Capabilities" help="https://xmpp.org/extensions/xep-0115.html" />
+	<item name="ChatStates" value="http://jabber.org/protocol/chatstates" comment="XEP-0085: Chat State Notifications" help="https://xmpp.org/extensions/xep-0085.html" />
+	<item name="AdHoc" value="http://jabber.org/protocol/commands" comment="XEP-0050: Ad-Hoc Commands" help="https://xmpp.org/extensions/xep-0050.html" />
+	<item name="StreamCompression" value="http://jabber.org/protocol/compress" comment="XEP-0138: Stream Compression" help="https://xmpp.org/extensions/xep-0138.html" />
+
+	<section comment="XEP-0030: Service Discovery" help="https://xmpp.org/extensions/xep-0030.html">
+		<item name="DiscoInfo" value="http://jabber.org/protocol/disco#info" />
+		<item name="DiscoItems" value="http://jabber.org/protocol/disco#items" />
+	</section>
+
+	<item name="FeatureNeg" value="http://jabber.org/protocol/feature-neg" comment="XEP-0020: Feature Negotiation" help="https://xmpp.org/extensions/xep-0020.html" />
+	<item name="GeoLoc" value="http://jabber.org/protocol/geoloc" comment="XEP-0080: User Geolocation" help="https://xmpp.org/extensions/xep-0080.html" />
+	<item name="HttpAuth" value="http://jabber.org/protocol/http-auth" comment="XEP-0070: Verifying HTTP Requests via XMPP" help="https://xmpp.org/extensions/xep-0070.html" />
+	<item name="HttpBind" value="http://jabber.org/protocol/httpbind" comment="XEP-0124: Bidirectional-streams Over Synchronous HTTP" help="XEP-0124: Bidirectional-streams Over Synchronous HTTP (BOSH)" />
+	<item name="Ibb" value="http://jabber.org/protocol/ibb" comment="XEP-0047: In-Band Bytestreams" help="https://xmpp.org/extensions/xep-0047.html" />
+	<item name="UserMood" value="http://jabber.org/protocol/mood" comment="XEP-0107: User Mood" help="https://xmpp.org/extensions/xep-0107.html" />
+
+	<section comment="XEP-0045: Multi-User Chat" help="https://xmpp.org/extensions/xep-0045.html">
+		<item name="MucAdmin" value="http://jabber.org/protocol/muc#admin" />
+		<item name="MucOwner" value="http://jabber.org/protocol/muc#owner" />
+		<item name="MucUser" value="http://jabber.org/protocol/muc#user" />
+	</section>
+
+	<item name="Nick" value="http://jabber.org/protocol/nick" comment="XEP-0172: User Nickname" help="https://xmpp.org/extensions/xep-0172.html" />
+	<item name="Offline" value="http://jabber.org/protocol/offline" comment="XEP-0013: Flexible Offline Message Retrieval" help="https://xmpp.org/extensions/xep-0013.html" />
+	<item name="PhysicalLocation" value="http://jabber.org/protocol/physloc" comment="XEP-0112: User Physical Location" help="https://xmpp.org/extensions/xep-0112.html" />
+
+	<section comment="XEP-0060: Publish-Subscribe" help="https://xmpp.org/extensions/xep-0060.html">
+		<item name="PubSub" value="http://jabber.org/protocol/pubsub" />
+		<item name="PubSubErrors" value="http://jabber.org/protocol/pubsub#errors" />
+		<item name="PubSubEvent" value="http://jabber.org/protocol/pubsub#event" />
+		<item name="PubSubOwner" value="http://jabber.org/protocol/pubsub#owner" />
+	</section>
+
+	<item name="RosterItemExchange" value="http://jabber.org/protocol/rosterx" comment="XEP-0144: Roster Item Exchange" help="https://xmpp.org/extensions/xep-0144.html" />
+	<item name="DataFormsLayout" value="http://jabber.org/protocol/xdata-layout" comment="XEP-0141: Data Forms Layout" help="https://xmpp.org/extensions/xep-0141.html" />
+	<item name="DataFormsValidation" value="http://jabber.org/protocol/xdata-validate" comment="XEP-0122: Data Forms Validation" help="https://xmpp.org/extensions/xep-0122.html" />
+
+	<section comment="RFC-6121: XMPP-IM" help="https://www.ietf.org/rfc/rfc6121.txt">
+		<item name="Client" value="jabber:client" />
+		<item name="Server" value="jabber:server" />
+	</section>
+
+	<section comment="XEP-0114: Existing Component Protocol" help="https://xmpp.org/extensions/xep-0114.html">
+		<item name="Accept" value="jabber:component:accept" />
+		<item name="Connect" value="jabber:component:connect" />
+	</section>
+
+	<item name="IqAuth" value="jabber:iq:auth" comment="XEP-0078: Non-SASL Authentication" help="https://xmpp.org/extensions/xep-0078.html" />
+	<item name="IqGateway" value="jabber:iq:gateway" comment="XEP-0100: Gateway Interaction" help="https://xmpp.org/extensions/xep-0100.html" />
+	<item name="IqLast" value="jabber:iq:last" comment="XEP-0012: Last Activity" help="https://xmpp.org/extensions/xep-0012.html" />
+	<item name="IqOob" value="jabber:iq:oob" comment="XEP-0066: Out of Band Data" help="https://xmpp.org/extensions/xep-0066.html" />
+	<item name="IqPrivacy" value="jabber:iq:privacy" comment="RFC-6121: XMPP-IM" help="https://www.ietf.org/rfc/rfc6121.txt" />
+	<item name="IqPrivate" value="jabber:iq:private" comment="XEP-0049: Private XML Storage" help="https://xmpp.org/extensions/xep-0049.html" />
+	<item name="IqRegister" value="jabber:iq:register" comment="XEP-0077: In-Band Registration" help="https://xmpp.org/extensions/xep-0077.html" />
+	<item name="IqRoster" value="jabber:iq:roster" comment="RFC-6121: XMPP-IM" help="https://www.ietf.org/rfc/rfc6121.txt" />
+	<item name="IqRpc" value="jabber:iq:rpc" comment="XEP-0009: Jabber-RPC" help="https://xmpp.org/extensions/xep-0009.html" />
+	<item name="IqSearch" value="jabber:iq:search" comment="XEP-0055: Jabber Search" help="https://xmpp.org/extensions/xep-0055.html" />
+	<item name="IqVersion" value="jabber:iq:version" comment="XEP-0092: Software Version" help="https://xmpp.org/extensions/xep-0092.html" />
+
+	<item name="Dialback" value="jabber:server:dialback"
+		  comment="XEP-0220: Server Dialback" help="https://xmpp.org/extensions/xep-0220.html" />
+
+	<item name="DirectMuc" value="jabber:x:conference" comment="XEP-0249: Direct MUC Invitations" help="https://xmpp.org/extensions/xep-0249.html" />
+	<item name="DataForms" value="jabber:x:data" comment="XEP-0004: Data Forms" help="https://xmpp.org/extensions/xep-0004.html" />
+	<item name="Oob" value="jabber:x:oob" comment="XEP-0066: Out of Band Data" help="https://xmpp.org/extensions/xep-0066.html" />
+	<item name="RosterDdelimiter" value="roster:delimiter" comment="XEP-0083: Nested Roster Groups" help="https://xmpp.org/extensions/xep-0083.html" />
+
+	<section comment="RFC 6120: XMPP Core" help="https://xmpp.org/rfcs/rfc6120.html">
+		<item name="Bind" value="urn:ietf:params:xml:ns:xmpp-bind" />
+		<item name="Sasl" value="urn:ietf:params:xml:ns:xmpp-sasl" />
+		<item name="Session" value="urn:ietf:params:xml:ns:xmpp-session" />
+		<item name="Stanzas" value="urn:ietf:params:xml:ns:xmpp-stanzas" />
+		<item name="Streams" value="urn:ietf:params:xml:ns:xmpp-streams" />
+		<item name="Tls" value="urn:ietf:params:xml:ns:xmpp-tls" />
+	</section>
+
+	<item name="Attention" value="urn:xmpp:attention:0" comment="XEP-0224: Attention" help="https://xmpp.org/extensions/xep-0224.html" />
+
+	<section comment="XEP-0084: User Avatars" help="https://xmpp.org/extensions/xep-0084.html">
+		<item name="UserAvatarsData" value="urn:xmpp:avatar:data"  />
+		<item name="UserAvatarsMetadata" value="urn:xmpp:avatar:metadata" />
+	</section>
+
+	<item name="Bidi" value="urn:xmpp:bidi" comment="XEP-0288: Bidirectional Server-to-Server Connections" help="https://xmpp.org/extensions/xep-0288.html" />
+	<item name="Bob" value="urn:xmpp:bob" comment="XEP-0231: Bits of Binary" help="https://xmpp.org/extensions/xep-0231.html" />
+	<item name="Captcha" value="urn:xmpp:captcha" comment="XEP-0158: CAPTCHA Forms" help="https://xmpp.org/extensions/xep-0158.html" />
+	<item name="Delay" value="urn:xmpp:delay" comment="XEP-0203: Delayed Delivery" help="https://xmpp.org/extensions/xep-0203.html" />
+	<item name="Ping" value="urn:xmpp:ping" comment="XEP-0199: XMPP Ping" help="https://xmpp.org/extensions/xep-0199.html" />
+	<item name="StreamManagement" value="urn:xmpp:sm:3" comment="XEP-0198: Stream Management" help="https://xmpp.org/extensions/xep-0198.html" />
+	<item name="EntityTime" value="urn:xmpp:time" comment="XEP-0202: Entity Time" help="https://xmpp.org/extensions/xep-0202.html" />
+	<item name="vCard" value="vcard-temp" comment="XEP-0054: vcard-temp" help="https://xmpp.org/extensions/xep-0054.html" />
+	<item name="vCardUpdate" value="vcard-temp:x:update" comment="XEP-0153: vCard-Based Avatars" help="https://xmpp.org/extensions/xep-0153.html" />
+
+	<item name="CryOnline" value="urn:cryonline:k01" />
+</content>

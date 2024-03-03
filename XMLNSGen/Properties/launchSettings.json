@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "XMLNSGen": {
+      "commandName": "Project",
+      "workingDirectory": "$(ProjectDir)"
+    }
+  }
+}
