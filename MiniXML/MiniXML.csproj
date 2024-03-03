@@ -13,7 +13,7 @@
 		<RepositoryUrl>https://github.com/nathan130200/MiniXML</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PackageTags>xml, xmpp, jabber, jabber-im</PackageTags>
-		<VersionPrefix>1.0.3</VersionPrefix>
+		<VersionPrefix>1.0.4</VersionPrefix>
 		<AssemblyVersion>$(VersionPrefix)</AssemblyVersion>
 		<FileVersion>$(VersionPrefix)</FileVersion>
 		<IncludeSymbols>True</IncludeSymbols>

@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Text;
+﻿using System.Text;
 using System.Xml;
 using System.Xml.Schema;
 
@@ -34,7 +33,7 @@ public class Parser : IDisposable
     }
 
     public bool IsEndOfStream
-        => _disposed || (_parser == null || _parser.EOF);
+        => _disposed || _parser == null || _parser.EOF;
 
     public void Dispose()
     {
@@ -51,13 +50,15 @@ public class Parser : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    static readonly bool s_Allow_XmlReader_AsyncCalls = false;
+
     public void Reset()
     {
         _parser?.Dispose();
 
         _parser = XmlReader.Create(_stream, new XmlReaderSettings
         {
-            Async = true,
+            Async = s_Allow_XmlReader_AsyncCalls,
             CloseInput = false,
             ConformanceLevel = ConformanceLevel.Fragment,
             DtdProcessing = DtdProcessing.Prohibit,
@@ -87,13 +88,8 @@ public class Parser : IDisposable
         }
     }
 
-    void CheckDisposed()
-    {
-        if (_disposed)
-            Debugger.Break();
-
-        ObjectDisposedException.ThrowIf(_disposed, this);
-    }
+    protected void CheckDisposed()
+        => ObjectDisposedException.ThrowIf(_disposed, this);
 
     #region Dispatch Events
 
@@ -142,19 +138,21 @@ public class Parser : IDisposable
 
     Element currentElem;
 
-    public void Update()
+    public bool Update()
     {
         CheckDisposed();
 
+        // Generally calls to this function in "blocking mode" will stall this function until
+        // it has some XML data to process (e.g. tcp socket/stream).
         if (!_parser.Read())
         {
             bool isEOF = _parser.EOF;
             Dispose();
 
             if (isEOF)
-                return;
+                return false;
 
-            throw new IOException("Unable to read XML from stream.");
+            throw new InvalidOperationException("The XML parser cannot process more of the stream.");
         }
 
         switch (_parser.NodeType)
@@ -197,19 +195,11 @@ public class Parser : IDisposable
                         FireOnStreamEnd();
                     else
                     {
-                        Debug.Assert(currentElem != null);
+                        if (currentElem == null)
+                            throw new InvalidOperationException("Current element should not be null while parsing end tag.");
 
                         if (currentElem.Name != _parser.Name)
-                        {
-                            throw new InvalidOperationException("Unexpected eng tag.")
-                            {
-                                Data =
-                                {
-                                    ["Expected"] = currentElem.Name,
-                                    ["Actual"] = _parser.Name
-                                }
-                            };
-                        }
+                            throw new InvalidOperationException($"Unexpected eng tag: {_parser.Name}");
 
                         var parent = currentElem.Parent;
 
@@ -224,8 +214,8 @@ public class Parser : IDisposable
             case XmlNodeType.SignificantWhitespace:
             case XmlNodeType.Text:
                 {
-                    Debug.Assert(currentElem != null);
-                    currentElem.Value += _parser.Value;
+                    if (currentElem != null)
+                        currentElem.Value += _parser.Value;
                 }
                 break;
 
@@ -233,5 +223,7 @@ public class Parser : IDisposable
                 // ignore
                 break;
         }
+
+        return true;
     }
 }

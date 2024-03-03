@@ -10,7 +10,7 @@ public readonly struct Jid : IEquatable<Jid>
     private readonly string _domain = default!;
     private readonly string _resource;
 
-    bool IsNil
+    public bool IsNil
         => string.IsNullOrWhiteSpace(_domain);
 
     public static Jid Empty => default;
