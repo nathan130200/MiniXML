@@ -195,6 +195,21 @@ public class Element
     }
 
     /// <summary>
+    /// Determines whether the element has the attribute.
+    /// </summary>
+    /// <param name="name">Attribute qualified name.</param>
+    /// <returns><see langword="true" /> if the attribute exists, <see langword="false" /> otherwise.</returns>
+    public bool HasAttribute(string name)
+    {
+        name = Xml.NormalizeXmlName(name);
+
+        lock (_attributes)
+        {
+            return _attributes.ContainsKey(name);
+        }
+    }
+
+    /// <summary>
     /// Gets the attribute value in this element.
     /// </summary>
     /// <param name="name">Attribute qualified name.</param>
