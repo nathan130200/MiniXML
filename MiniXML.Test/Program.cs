@@ -1,8 +1,16 @@
-﻿using MiniXML;
+﻿using System.Diagnostics;
+using MiniXML;
 
-var result = Xml.Element("r");
+Element elem;
 
-using (var fs = File.OpenRead(@".\Input.xml"))
-    result = Xml.Parse(fs);
+using (var fs = File.OpenRead(@".\data\Input.xml"))
+    elem = Xml.Parse(fs);
 
-File.WriteAllText(@".\Output.xml", result.ToString(false));
+var query = elem.GetChild(x => x.Name == "G07ndc7E" && x.HasAttribute("pride"), true);
+Debugger.Break();
+
+// text content and attribute values are escaped when parsed.
+Debug.Assert(query.Value == "9MXJ<$");
+Debugger.Break();
+
+File.WriteAllText(@".\data\Output.xml", elem.ToString(indent: false));

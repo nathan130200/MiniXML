@@ -41,7 +41,7 @@ public static class Xml
     }
 
     /// <summary>
-    /// Inline parses the provided XML content and returns the element.
+    /// Inline parses the provided XML from stream and returns the element.
     /// </summary>
     /// <param name="stream">Stream that will be used for reading.</param>
     /// <param name="bufferSize">Internal read buffer size.</param>
@@ -65,7 +65,22 @@ public static class Xml
         return result;
     }
 
-    internal static string IndentChar = "  ";
+    /// <summary>
+    /// Inline parses the provided XML from file and returns the element.
+    /// </summary>
+    /// <param name="fileName">File name that will be opened and used for reading.</param>
+    /// <param name="bufferSize">Internal read buffer size.</param>
+    /// <param name="encoding">Determines the character encoding. Defaults to: <see cref="Encoding.UTF8"/></param>
+    /// <returns>Instance of the well-formed element that was read.</returns>
+    public static Element Parse(string fileName, int bufferSize = ushort.MaxValue, Encoding encoding = default)
+    {
+        using var fs = File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+        return Parse(fs, bufferSize, encoding);
+    }
+
+    #region Xml serialization
+
+    internal static string IndentChar = " ";
 
     internal static string WriteTree(Element e, bool indent, bool innerOnly)
     {
@@ -92,6 +107,45 @@ public static class Xml
         return sb.ToString();
     }
 
+    static bool IsXmlOrXmlnsDeclaration(KeyValuePair<string, string> entry)
+    {
+        return entry.Key == "xmlns"
+                || entry.Key.StartsWith("xmlns:")
+                || entry.Key.StartsWith("xml:");
+    }
+
+    static void WriteElementNamespaces(Element e, XmlWriter w)
+    {
+        var entries = e.Attributes.Where(IsXmlOrXmlnsDeclaration);
+        WriteAttributesKvp(e, entries, w);
+    }
+
+    static void WriteElementAttributes(Element e, XmlWriter w)
+    {
+        var entries = e.Attributes.Where(x => !IsXmlOrXmlnsDeclaration(x));
+        WriteAttributesKvp(e, entries, w);
+    }
+
+    static void WriteAttributesKvp(Element e, in IEnumerable<KeyValuePair<string, string>> dict, XmlWriter w)
+    {
+        foreach (var (name, value) in dict)
+        {
+            var hasPrefix = name.DeconstructXmlName(out var localName, out var prefix);
+
+            if (!hasPrefix)
+                w.WriteAttributeString(name, value);
+            else
+            {
+                if (prefix == "xml")
+                    w.WriteAttributeString(localName, Namespace.Xml, value);
+                else if (prefix == "xmlns")
+                    w.WriteAttributeString(localName, Namespace.Xmlns, value);
+                else
+                    w.WriteAttributeString(localName, e.GetNamespace(prefix) ?? string.Empty);
+            }
+        }
+    }
+
     static void WriteTreeInternal(Element e, XmlWriter w, bool innerOnly)
     {
         if (!innerOnly)
@@ -105,22 +159,8 @@ public static class Xml
             else
                 w.WriteStartElement(prefix, localName, ns);
 
-            foreach (var (name, value) in e.Attributes)
-            {
-                var hasPrefix = name.DeconstructXmlName(out localName, out prefix);
-
-                if (!hasPrefix)
-                    w.WriteAttributeString(name, value);
-                else
-                {
-                    if (prefix == "xml")
-                        w.WriteAttributeString(localName, Namespace.Xml, value);
-                    else if (prefix == "xmlns")
-                        w.WriteAttributeString(localName, Namespace.Xmlns, value);
-                    else
-                        w.WriteAttributeString(localName, e.GetNamespace(prefix) ?? string.Empty, value);
-                }
-            }
+            WriteElementNamespaces(e, w);
+            WriteElementAttributes(e, w);
         }
 
         if (e.Value != null)
@@ -132,6 +172,8 @@ public static class Xml
         if (!innerOnly)
             w.WriteEndElement();
     }
+
+    #endregion
 
     /// <summary>
     /// Helper function that creates a new element.
@@ -194,39 +236,70 @@ public static class Xml
     /// <summary>
     /// Gets the value of the attribute that will be converted to its appropriate type.
     /// </summary>
-    /// <typeparam name="TValue">Type that implements the <see cref="IParsable{TValue}"/> interface for conversion.</typeparam>
+    /// <typeparam name="TValue">Type that will be parsed.</typeparam>
     /// <param name="e">Element instance.</param>
     /// <param name="name">Attribute name.</param>
     /// <param name="defaultValue">Fallback attribute value.</param>
     /// <param name="provider"><i>Optional</i> format provider for custom formatting.</param>
     /// <returns>The converted attribute value, or the <paramref name="defaultValue"/> value if a problem occurred or the attribute does not exist.</returns>
     public static TValue GetAttributeValue<TValue>(this Element e, string name, TValue defaultValue = default, IFormatProvider provider = default)
-        where TValue : IParsable<TValue>
     {
         var attrVal = e.GetAttribute(name);
 
         if (attrVal != null)
-            if (TValue.TryParse(attrVal, provider ?? CultureInfo.InvariantCulture, out var result))
-                return result;
+            return Utilities.TryParseString(attrVal, provider, defaultValue);
 
         return defaultValue;
     }
 
     /// <summary>
+    /// Inline gets the value of the attribute that will be converted to its appropriate type.
+    /// </summary>
+    /// <typeparam name="TValue">Type that will be parsed.</typeparam>
+    /// <param name="e">Element instance.</param>
+    /// <param name="name">Attribute name.</param>
+    /// <param name="result">Output to the converted attribute value</param>
+    /// <param name="defaultValue">Fallback attribute value.</param>
+    /// <param name="provider"><i>Optional</i> format provider for custom formatting.</param>
+    /// <returns>Element instance for fluent builder.</returns>
+    public static Element GetAttributeValue<TValue>(this Element e, string name, out TValue result, TValue defaultValue = default, IFormatProvider provider = default)
+    {
+        var attrVal = e.GetAttribute(name);
+
+        result = defaultValue;
+
+        if (attrVal != null)
+            result = Utilities.TryParseString(attrVal, provider, defaultValue);
+
+        return e;
+    }
+
+    /// <summary>
     /// Sets the attribute on the element.
     /// </summary>
-    /// <typeparam name="TValue">Type that implements the <see cref="IFormattable"/> interface for conversion.</typeparam>
+    /// <typeparam name="TValue">Type that will be converted.</typeparam>
     /// <param name="e">Element instance.</param>
     /// <param name="name">Attribute name.</param>
     /// <param name="value">Attribute value in current type.</param>
     /// <param name="format"><i>Optional</i> format during conversion to string.</param>
     /// <param name="provider"><i>Optional</i> format provider for custom formatting.</param>
-    public static void SetAttributeValue<TValue>(this Element e, string name, TValue value, string format = default, IFormatProvider provider = default)
-        where TValue : IFormattable
+    public static Element SetAttributeValue<TValue>(this Element e, string name, TValue value, string format = default, IFormatProvider provider = default)
     {
         if (value is decimal or double or float)
             format ??= "F6";
 
-        e.SetAttribute(name, value?.ToString(format, provider ?? CultureInfo.InvariantCulture) ?? string.Empty);
+        if (value is IFormattable fmt)
+            e.SetAttribute(name, fmt?.ToString(format, provider ?? CultureInfo.InvariantCulture) ?? string.Empty);
+        else if (value is IConvertible conv)
+            e.SetAttribute(name, conv.ToString(provider));
+        else
+        {
+            if (value is null)
+                e.RemoveAttribute(name);
+            else
+                e.SetAttribute(name, value?.ToString() ?? string.Empty);
+        }
+
+        return e;
     }
 }
