@@ -19,7 +19,7 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<AnalysisLevel>latest</AnalysisLevel>
 		<Copyright>nathan130200</Copyright>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<PackageReadmeFile>CHANGELOG.md</PackageReadmeFile>
 		<PackageLicenseFile>LICENSE</PackageLicenseFile>
 		<NoWarn>CS1591</NoWarn>
 	</PropertyGroup>
