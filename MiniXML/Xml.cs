@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Xml;
@@ -210,6 +211,97 @@ public static class Xml
     {
         parent.AddChild(child);
         return parent;
+    }
+
+    public static Element Attr(this Element element, string name, string value)
+    {
+        element.SetAttribute(name, value);
+        return element;
+    }
+
+    public static Element Attr<T>(this Element e, string name, (T value, string format) tuple)
+        where T : IFormattable
+    {
+        return e.Attr(name, tuple: (tuple.value, tuple.format, CultureInfo.InvariantCulture));
+    }
+
+    public static Element Attr<T>(this Element e, string name, (T value, string format, IFormatProvider provider) tuple)
+        where T : IFormattable
+    {
+        var (value, format, provider) = tuple;
+        ArgumentNullException.ThrowIfNull(provider);
+        e.SetAttribute(name, value.ToString(format, provider));
+        return e;
+    }
+
+    public static Element Attr<T>(this Element element, string name, T value) where T : struct
+    {
+        element.SetAttributeValue(name, value);
+        return element;
+    }
+
+    public static Element Attrs(this Element e, object attrs, IFormatProvider provider = default)
+    {
+        ArgumentNullException.ThrowIfNull(attrs);
+
+        provider ??= CultureInfo.InvariantCulture;
+
+        foreach (var prop in attrs.GetType().GetTypeInfo().DeclaredProperties)
+        {
+            var attName = prop.Name;
+            string attVal;
+
+            var rawValue = prop.GetValue(attrs);
+
+            if (rawValue == null)
+                attVal = string.Empty;
+            else
+                attVal = ToStringValue(rawValue, null, provider);
+
+            e.SetAttribute(attName, attVal);
+        }
+
+        return e;
+    }
+
+    static string ToStringValue(object value, string format, IFormatProvider provider)
+    {
+        provider ??= CultureInfo.InvariantCulture;
+
+        string result;
+
+        if (value is IFormattable fmt)
+            result = fmt.ToString(format, provider);
+        else if (value is IConvertible conv)
+            result = conv.ToString(provider);
+        else if (value is ITuple tuple)
+        {
+            if (tuple.Length >= 2)
+            {
+                if (tuple.Length > 3)
+                    throw new InvalidOperationException("Tuple values expect 2 components (value, format) or 3 components (value, format, format provider)");
+
+                IFormatProvider thisProvider = default;
+
+                var thisValue = tuple[0];
+                var thisFormat = tuple[1] as string;
+
+                if (tuple.Length > 3)
+                    thisProvider = (tuple[2] as IFormatProvider) ?? provider;
+
+                result = ToStringValue(thisValue, thisFormat, thisProvider);
+            }
+            else
+            {
+                // tuple accept only 2 or 3 params (value, format) or (value, format, provider)
+                // otherwise serialize as string.
+                result = tuple.ToString();
+            }
+        }
+        else
+            result = value?.ToString() ?? string.Empty;
+
+        return result;
     }
 
     /// <summary>
