@@ -71,6 +71,7 @@
 	<item name="RosterDdelimiter" value="roster:delimiter" comment="XEP-0083: Nested Roster Groups" help="https://xmpp.org/extensions/xep-0083.html" />
 
 	<section comment="RFC-6120: XMPP Core" help="https://xmpp.org/rfcs/rfc6120.html">
+		<item name="Stream" value="http://etherx.jabber.org/streams" />
 		<item name="Client" value="jabber:client" />
 		<item name="Server" value="jabber:server" />
 		<item name="Bind" value="urn:ietf:params:xml:ns:xmpp-bind" />
