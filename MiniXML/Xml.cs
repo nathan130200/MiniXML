@@ -41,6 +41,8 @@ public static class Xml
         }
     }
 
+    public static bool IsStanza(Element e)
+        => e.Name is "stream:stream" or "iq" or "message" or "presence";
     /// <summary>
     /// Inline parses the provided XML from stream and returns the element.
     /// </summary>
